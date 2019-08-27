@@ -14,7 +14,7 @@ use Mojo::JSON::Pointer;
 use Mojo::Server;
 use Mojo::UserAgent;
 use Mojo::Util qw(decode encode monkey_patch);
-use Test2::API qw(context);
+use Test2::API qw(context context_do);
 use Test2::V0;
 
 has [qw(message success tx)];
@@ -27,9 +27,11 @@ $ENV{MOJO_LOG_LEVEL} ||= $ENV{HARNESS_IS_VERBOSE} ? 'debug' : 'fatal';
 for my $method (qw(delete get head options patch post put)) {
   monkey_patch __PACKAGE__, "${method}_ok", sub {
     my ($self, $url) = (shift, shift);
-    my $ctx  = context;
-    $self->_request_ok($self->ua->build_tx(uc $method, $url, @_), $url);
-    $ctx->release;
+    context_do {
+      my $ctx  = context;
+      $self->_request_ok($self->ua->build_tx(uc $method, $url, @_), $url);
+      $ctx->release;
+    };
     return $self->success;
   };
 }
@@ -368,9 +370,11 @@ sub or {
 
 sub request_ok {
   my $self = shift;
-  my $ctx = context;
-  $self->_request_ok($_[0], $_[0]->req->url->to_string);
-  $ctx->release;
+  context_do {
+    my $ctx = context;
+    $self->_request_ok($_[0], $_[0]->req->url->to_string);
+    $ctx->release;
+  };
   return $self->success;
 }
 
