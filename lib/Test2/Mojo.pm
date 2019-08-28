@@ -27,12 +27,13 @@ $ENV{MOJO_LOG_LEVEL} ||= $ENV{HARNESS_IS_VERBOSE} ? 'debug' : 'fatal';
 for my $method (qw(delete get head options patch post put)) {
   monkey_patch __PACKAGE__, "${method}_ok", sub {
     my ($self, $url) = (shift, shift);
+    my @args = @_;
     context_do {
-      my $ctx  = context;
-      $self->_request_ok($self->ua->build_tx(uc $method, $url, @_), $url);
+      my $ctx = context;
+      $self->_request_ok($self->ua->build_tx(uc $method, $url, @args), $url);
       $ctx->release;
     };
-    return $self->success;
+    return $self;
   };
 }
 
@@ -249,10 +250,11 @@ sub json_is {
 }
 
 sub json_like {
-  my ($self, $p, $regex, $desc) = @_;
+  my $self = shift;
+  my ($p, $data) = @_ > 1 ? (shift, shift) : ('', shift);
   my $ctx = context;
   my $out = like($self->tx->res->json($p),
-    $regex, _desc($desc, qq{similar match for JSON Pointer "$p"}));
+    $data, _desc(shift, qq{similar match for JSON Pointer "$p"}));
   $ctx->release;
   return $self->success($out);
 }
@@ -286,28 +288,31 @@ sub json_message_is {
 }
 
 sub json_message_like {
-  my ($self, $p, $regex, $desc) = @_;
-  my $ctx = context;
+  my $self = shift;
+  my $ctx  = context;
+  my ($p, $data) = @_ > 1 ? (shift, shift) : ('', shift);
   my $out = like($self->_json(get => $p),
-    $regex, _desc($desc, qq{similar match for JSON Pointer "$p"}));
+    $data, _desc(shift, qq{similar match for JSON Pointer "$p"}));
   $ctx->release;
   return $self->success($out);
 }
 
 sub json_message_unlike {
-  my ($self, $p, $regex, $desc) = @_;
-  my $ctx = context;
+  my $self = shift;
+  my $ctx  = context;
+  my ($p, $data) = @_ > 1 ? (shift, shift) : ('', shift);
   my $out = unlike($self->_json(get => $p),
-    $regex, _desc($desc, qq{no similar match for JSON Pointer "$p"}));
+    $data, _desc(shift, qq{no similar match for JSON Pointer "$p"}));
   $ctx->release;
   return $self->success($out);
 }
 
 sub json_unlike {
-  my ($self, $p, $regex, $desc) = @_;
-  my $ctx = context;
+  my $self = shift;
+  my $ctx  = context;
+  my ($p, $data) = @_ > 1 ? (shift, shift) : ('', shift);
   my $out = unlike($self->tx->res->json($p),
-    $regex, _desc($desc, qq{no similar match for JSON Pointer "$p"}));
+    $data, _desc(shift, qq{no similar match for JSON Pointer "$p"}));
   $ctx->release;
   return $self->success($out);
 }
@@ -317,7 +322,7 @@ sub message_is {
   my $ctx = context;
   $self->_message('is', $value, _desc($desc, 'exact match for message'));
   $ctx->release;
-  return $self->success;
+  return $self;
 }
 
 sub message_isnt {
@@ -325,7 +330,7 @@ sub message_isnt {
   my $ctx = context;
   $self->_message('isnt', $value, _desc($desc, 'no match for message'));
   $ctx->release;
-  return $self->success;
+  return $self;
 }
 
 sub message_like {
@@ -333,7 +338,7 @@ sub message_like {
   my $ctx = context;
   $self->_message('like', $regex, _desc($desc, 'message is similar'));
   $ctx->release;
-  return $self->success;
+  return $self;
 }
 
 sub message_ok {
@@ -348,7 +353,8 @@ sub message_unlike {
   my ($self, $regex, $desc) = @_;
   my $ctx = context;
   $self->_message('unlike', $regex, _desc($desc, 'message is not similar'));
-  return $self->success;
+  $ctx->release;
+  return $self;
 }
 
 sub new {
@@ -370,12 +376,13 @@ sub or {
 
 sub request_ok {
   my $self = shift;
+  my $tx   = $_[0];
   context_do {
     my $ctx = context;
-    $self->_request_ok($_[0], $_[0]->req->url->to_string);
+    $self->_request_ok($tx, $tx->req->url->to_string);
     $ctx->release;
   };
-  return $self->success;
+  return $self;
 }
 
 sub reset_session {
@@ -459,10 +466,10 @@ sub text_unlike {
 
 sub websocket_ok {
   my $self = shift;
-  my $ctx = context;
+  my $ctx  = context;
   $self->_request_ok($self->ua->build_websocket_tx(@_), $_[0]);
   $ctx->release;
-  return $self->success;
+  return $self;
 }
 
 sub _desc { encode 'UTF-8', shift || shift }
