@@ -1,16 +1,14 @@
 #!/usr/bin/env perl
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
-use Test2::V0 -target => 'Test2::Mojo';
+use Test2::V0 -target => 'Test2::MojoX';
 
 use Mojolicious::Lite;
 
-my $t = Test2::Mojo->new;
-
+my $t = Test2::MojoX->new;
 my $events;
 
 ## status_is
-
 $events = intercept {
   $t->get_ok('/')->status_is(404);
 };
@@ -30,7 +28,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## status_isnt
-
 $events = intercept {
   $t->get_ok('/')->status_isnt(200);
 };

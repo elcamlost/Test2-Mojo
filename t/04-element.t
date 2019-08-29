@@ -1,16 +1,15 @@
 #!/usr/bin/env perl
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
-use Test2::V0 -target => 'Test2::Mojo';
+use Test2::V0 -target => 'Test2::MojoX';
 
 use Mojolicious::Lite;
 get '/' => 'index';
 
-my $t = Test2::Mojo->new;
+my $t = Test2::MojoX->new;
 my $events;
 
 ## element_count_is
-
 $events = intercept {
   $t->get_ok('/')->element_count_is('ul>li', 2);
 };
@@ -28,7 +27,6 @@ is $events->[1]->name, 'element count for selector "div>span"';
 ok !$events->[1]->pass;
 
 ## element_exists
-
 $events = intercept {
   $t->get_ok('/')->element_exists('ul>li');
 };
@@ -47,7 +45,6 @@ ok !$events->[1]->pass;
 isa_ok $events->[2], 'Test2::Event::Diag';
 
 ## element_exists_not
-
 $events = intercept {
   $t->get_ok('/')->element_exists_not('div>span');
 };

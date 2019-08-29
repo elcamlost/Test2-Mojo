@@ -1,16 +1,14 @@
 #!/usr/bin/env perl
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
-use Test2::V0 -target => 'Test2::Mojo';
+use Test2::V0 -target => 'Test2::MojoX';
 
 use Mojolicious::Lite;
 
-my $t = Test2::Mojo->new;
-
+my $t = Test2::MojoX->new;
 my $events;
 
 ## header_exists
-
 $events = intercept {
   $t->get_ok('/')->header_exists('server');
 };
@@ -29,7 +27,6 @@ ok !$events->[1]->pass;
 isa_ok $events->[2], 'Test2::Event::Diag';
 
 ## header_exists_not
-
 $events = intercept {
   $t->get_ok('/')->header_exists_not('unknown');
 };
@@ -48,7 +45,6 @@ ok !$events->[1]->pass;
 isa_ok $events->[2], 'Test2::Event::Diag';
 
 ## header_is
-
 $events = intercept {
   $t->get_ok('/')->header_is('server' => 'Mojolicious (Perl)');
 };
@@ -68,7 +64,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## header_isnt
-
 $events = intercept {
   $t->get_ok('/')->header_isnt('server' => 'Django (Python)');
 };
@@ -88,7 +83,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## header_like
-
 $events = intercept {
   $t->get_ok('/')->header_like('server' => qr/Mojo/);
 };
@@ -108,7 +102,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## header_unlike
-
 $events = intercept {
   $t->get_ok('/')->header_unlike('server' => qr/Django/);
 };

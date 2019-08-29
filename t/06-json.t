@@ -1,10 +1,9 @@
 #!/usr/bin/env perl
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
-use Test2::V0 -target => 'Test2::Mojo';
+use Test2::V0 -target => 'Test2::MojoX';
 
 use Mojolicious::Lite;
-
 get '/' => sub {
   shift->render(
     json => {
@@ -15,11 +14,10 @@ get '/' => sub {
   );
 };
 
-my $t = Test2::Mojo->new;
+my $t = Test2::MojoX->new;
 my $events;
 
 ## json_has
-
 $events = intercept {
   $t->get_ok('/')->json_has('/scalar');
 };
@@ -38,7 +36,6 @@ ok !$events->[1]->pass;
 isa_ok $events->[2], 'Test2::Event::Diag';
 
 ## json_hasnt
-
 $events = intercept {
   $t->get_ok('/')->json_hasnt('/unknown');
 };
@@ -57,7 +54,6 @@ ok !$events->[1]->pass;
 isa_ok $events->[2], 'Test2::Event::Diag';
 
 ## json_is
-
 $events = intercept {
   $t->get_ok('/')->json_is('/scalar' => 'value');
 };
@@ -98,7 +94,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## json_like
-
 $events = intercept {
   $t->get_ok('/')->json_like('/scalar' => qr/val/);
 };
@@ -131,7 +126,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## json_unlike
-
 $events = intercept {
   $t->get_ok('/')->json_unlike('/scalar' => qr/false/);
 };

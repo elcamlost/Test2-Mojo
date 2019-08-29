@@ -1,4 +1,4 @@
-package Test2::Mojo;
+package Test2::MojoX;
 use Mojo::Base -base;
 
 ## "Amy: He knows when you are sleeping.
@@ -147,9 +147,14 @@ sub element_exists_not {
 sub finish_ok {
   my $self = shift;
   my $ctx  = context;
-  $self->tx->finish(@_) if $self->tx->is_websocket;
-  Mojo::IOLoop->one_tick while !$self->{finished};
-  my $out = ok(1, 'closed WebSocket');
+  my $out;
+  if ($self->tx->is_websocket) {
+    $self->tx->finish(@_);
+    Mojo::IOLoop->one_tick while !$self->{finished};
+    $out = ok(1, 'closed WebSocket');
+  } else {
+    $out = ok(0, 'connection is not WebSocket');
+  }
   $ctx->release;
   return $self->success($out);
 }
@@ -158,7 +163,7 @@ sub finished_ok {
   my ($self, $code) = @_;
   my $ctx = context;
   Mojo::IOLoop->one_tick while !$self->{finished};
-  Test2::Tools::Basic::diag "WebSocket closed with out $self->{finished}[0]"
+  $ctx->diag("WebSocket closed with out $self->{finished}[0]")
     unless my $ok = $self->{finished}[0] == $code;
   my $out = ok($ok, "WebSocket closed with out $code");
   $ctx->release;

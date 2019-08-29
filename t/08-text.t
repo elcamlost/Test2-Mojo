@@ -1,16 +1,15 @@
 #!/usr/bin/env perl
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
-use Test2::V0 -target => 'Test2::Mojo';
+use Test2::V0 -target => 'Test2::MojoX';
 
 use Mojolicious::Lite;
 get '/' => 'index';
 
-my $t = Test2::Mojo->new;
+my $t = Test2::MojoX->new;
 my $events;
 
 ## text_is
-
 $events = intercept {
   $t->get_ok('/')->text_is('#sam' => 'Gamgee');
 };
@@ -30,7 +29,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## text_isnt
-
 $events = intercept {
   $t->get_ok('/')->text_isnt('#frodo' => 'Baggins');
 };
@@ -50,7 +48,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## text_like
-
 $events = intercept {
   $t->get_ok('/')->text_like('#sam' => qr/Gamgee/);
 };
@@ -70,7 +67,6 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 ## text_unlike
-
 $events = intercept {
   $t->get_ok('/')->text_unlike('#sam' => qr/Baggins/);
 };
@@ -90,6 +86,7 @@ isa_ok $events->[2], 'Test2::Event::Diag';
 isa_ok $events->[3], 'Test2::Event::Diag';
 
 done_testing;
+
 __DATA__
 @@ index.html.epl
 <div>

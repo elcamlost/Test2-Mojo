@@ -1,9 +1,9 @@
 #!/usr/bin/env perl
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
-use Test2::V0 -target => 'Test2::Mojo';
+use Test2::V0 -target => 'Test2::MojoX';
 
-ok $CLASS, 'Test2::Mojo';
+ok $CLASS, 'Test2::MojoX';
 
 use Mojolicious::Lite;
 
@@ -12,21 +12,24 @@ get '/' => sub {
   $c->render(text => 'Bender');
 };
 
-my $t = Test2::Mojo->new;
-isa_ok $t, 'Test2::Mojo';
-isa_ok $t->app, 'Mojolicious';
-
+my $t = Test2::MojoX->new;
 my $events;
 
-my @methods = qw(delete get head options patch post put);
+isa_ok $t, 'Test2::MojoX';
+isa_ok $t->app, 'Mojolicious';
 
+my $moniker = $t->app->moniker;
+$t->app(__PACKAGE__->new->moniker('Test'));
+is $t->app->moniker, 'Test';
+isnt $moniker, 'Test';
+
+my @methods = qw(delete get head options patch post put);
 $events = intercept {
   for my $method (@methods) {
     my $sub_name = "${method}_ok";
     $t->$sub_name('/');
   }
 };
-
 is @$events, 7;
 for my $i (0 .. 6) {
   my $method = $methods[$i];
@@ -36,8 +39,8 @@ for my $i (0 .. 6) {
   is $event->name, uc $method . ' /';
   is $event->pass, 1;
 }
-
 is $t->success, 1;
+
 isa_ok $t->ua,  'Mojo::UserAgent';
 ok $t->ua->insecure;
 
