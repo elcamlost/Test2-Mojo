@@ -2,6 +2,7 @@
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
 use Test2::V0 -target => 'Test2::MojoX';
+use Test2::Tools::Tester qw(facets);
 
 use Mojolicious::Lite;
 get '/' => sub {
@@ -15,54 +16,47 @@ get '/' => sub {
 };
 
 my $t = Test2::MojoX->new;
-my $events;
+my $assert_facets;
 
 ## json_has
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_has('/scalar');
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'has value for JSON Pointer "/scalar"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'has value for JSON Pointer "/scalar"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_has('/unknown');
 };
-is @$events, 3;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'has value for JSON Pointer "/unknown"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'has value for JSON Pointer "/unknown"';
+ok !$assert_facets->[1]->pass;
 
 ## json_hasnt
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_hasnt('/unknown');
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'has no value for JSON Pointer "/unknown"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'has no value for JSON Pointer "/unknown"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_hasnt('/scalar');
 };
-is @$events, 3;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'has no value for JSON Pointer "/scalar"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'has no value for JSON Pointer "/scalar"';
+ok !$assert_facets->[1]->pass;
 
 ## json_is
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_is('/scalar' => 'value');
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'exact match for JSON Pointer "/scalar"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'exact match for JSON Pointer "/scalar"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_is(hash {
     field scalar => 'value';
     field array  => array {
@@ -78,31 +72,26 @@ $events = intercept {
     end;
   });
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'exact match for JSON Pointer ""';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'exact match for JSON Pointer ""';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_is('/unknown' => 'value');
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'exact match for JSON Pointer "/unknown"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
-isa_ok $events->[3], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'exact match for JSON Pointer "/unknown"';
+ok !$assert_facets->[1]->pass;
 
 ## json_like
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_like('/scalar' => qr/val/);
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'similar match for JSON Pointer "/scalar"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'similar match for JSON Pointer "/scalar"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_like(hash {
     field scalar => 'value';
     field array  => array {
@@ -110,31 +99,26 @@ $events = intercept {
     };
   });
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'similar match for JSON Pointer ""';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'similar match for JSON Pointer ""';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_like('/scalar' => qr/false/);
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'similar match for JSON Pointer "/scalar"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
-isa_ok $events->[3], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'similar match for JSON Pointer "/scalar"';
+ok !$assert_facets->[1]->pass;
 
 ## json_unlike
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_unlike('/scalar' => qr/false/);
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no similar match for JSON Pointer "/scalar"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no similar match for JSON Pointer "/scalar"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_unlike(hash {
     field scalar => 'false';
     field array  => array {
@@ -142,19 +126,15 @@ $events = intercept {
     };
   });
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no similar match for JSON Pointer ""';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no similar match for JSON Pointer ""';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->json_unlike('/scalar' => qr/value/);
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no similar match for JSON Pointer "/scalar"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
-isa_ok $events->[3], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no similar match for JSON Pointer "/scalar"';
+ok !$assert_facets->[1]->pass;
 
 done_testing;

@@ -2,6 +2,7 @@
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
 use Test2::V0 -target => 'Test2::MojoX';
+use Test2::Tools::Tester qw(facets);
 
 use Mojolicious::Lite;
 websocket '/' => sub {
@@ -10,10 +11,10 @@ websocket '/' => sub {
 };
 
 my $t = Test2::MojoX->new;
-my $events;
+my $assert_facets;
 
 ## json_message_is
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_is(hash {
     field test    => 23;
@@ -21,105 +22,87 @@ $events = intercept {
     end;
     });
 };
-is @$events, 4;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'exact match for JSON Pointer ""';
-ok $events->[3]->pass;
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'exact match for JSON Pointer ""';
+ok $assert_facets->[3]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_is(hash {
     field test => 23;
     end;
     });
 };
-is @$events, 6;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'exact match for JSON Pointer ""';
-ok !$events->[3]->pass;
-isa_ok $events->[4], 'Test2::Event::Diag';
-isa_ok $events->[5], 'Test2::Event::Diag';
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'exact match for JSON Pointer ""';
+ok !$assert_facets->[3]->pass;
 
 ## json_message_like
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_like(hash { field test => 23; });
 };
-is @$events, 4;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'similar match for JSON Pointer ""';
-ok $events->[3]->pass;
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'similar match for JSON Pointer ""';
+ok $assert_facets->[3]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_like(hash { field test => 24; });
 };
-is @$events, 6;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'similar match for JSON Pointer ""';
-ok !$events->[3]->pass;
-isa_ok $events->[4], 'Test2::Event::Diag';
-isa_ok $events->[5], 'Test2::Event::Diag';
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'similar match for JSON Pointer ""';
+ok !$assert_facets->[3]->pass;
 
 ## json_message_unlike
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_unlike(hash { field test => 24; });
 };
-is @$events, 4;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'no similar match for JSON Pointer ""';
-ok $events->[3]->pass;
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'no similar match for JSON Pointer ""';
+ok $assert_facets->[3]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_unlike(hash { field test => 23; });
 };
-is @$events, 6;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'no similar match for JSON Pointer ""';
-ok !$events->[3]->pass;
-isa_ok $events->[4], 'Test2::Event::Diag';
-isa_ok $events->[5], 'Test2::Event::Diag';
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'no similar match for JSON Pointer ""';
+ok !$assert_facets->[3]->pass;
 
 ## json_message_has
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_has('/test');
 };
-is @$events, 4;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'has value for JSON Pointer "/test"';
-ok $events->[3]->pass;
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'has value for JSON Pointer "/test"';
+ok $assert_facets->[3]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_has('/non-existent');
 };
-is @$events, 5;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'has value for JSON Pointer "/non-existent"';
-ok !$events->[3]->pass;
-isa_ok $events->[4], 'Test2::Event::Diag';
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'has value for JSON Pointer "/non-existent"';
+ok !$assert_facets->[3]->pass;
 
 ## json_message_hasnt
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_hasnt('/non-existent');
 };
-is @$events, 4;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'has no value for JSON Pointer "/non-existent"';
-ok $events->[3]->pass;
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'has no value for JSON Pointer "/non-existent"';
+ok $assert_facets->[3]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->websocket_ok('/')->send_ok({json => {test => 23, snowman => '☃'}})
     ->message_ok->json_message_hasnt('/test');
 };
-is @$events, 5;
-isa_ok $events->[3], 'Test2::Event::Ok';
-is $events->[3]->name, 'has no value for JSON Pointer "/test"';
-ok !$events->[3]->pass;
-isa_ok $events->[4], 'Test2::Event::Diag';
+is @$assert_facets, 4;
+is $assert_facets->[3]->details, 'has no value for JSON Pointer "/test"';
+ok !$assert_facets->[3]->pass;
 
 done_testing;

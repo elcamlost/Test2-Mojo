@@ -2,88 +2,73 @@
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
 use Test2::V0 -target => 'Test2::MojoX';
+use Test2::Tools::Tester qw(facets);
 
 use Mojolicious::Lite;
 get '/' => 'index';
 
 my $t = Test2::MojoX->new;
-my $events;
+my $assert_facets;
 
 ## text_is
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->text_is('#sam' => 'Gamgee');
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'exact match for selector "#sam"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'exact match for selector "#sam"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->text_is('#frodo' => 'Baggins');
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'exact match for selector "#frodo"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
-isa_ok $events->[3], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'exact match for selector "#frodo"';
+ok !$assert_facets->[1]->pass;
 
 ## text_isnt
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->text_isnt('#frodo' => 'Baggins');
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no match for selector "#frodo"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no match for selector "#frodo"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->text_isnt('#sam' => 'Gamgee');
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no match for selector "#sam"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
-isa_ok $events->[3], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no match for selector "#sam"';
+ok !$assert_facets->[1]->pass;
 
 ## text_like
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->text_like('#sam' => qr/Gamgee/);
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'similar match for selector "#sam"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'similar match for selector "#sam"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->text_like('#sam' => qr/Baggins/);
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'similar match for selector "#sam"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
-isa_ok $events->[3], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'similar match for selector "#sam"';
+ok !$assert_facets->[1]->pass;
 
 ## text_unlike
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->text_unlike('#sam' => qr/Baggins/);
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no similar match for selector "#sam"';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no similar match for selector "#sam"';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->text_unlike('#sam' => qr/Gamgee/);
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no similar match for selector "#sam"';
-ok !$events->[1]->pass;
-isa_ok $events->[2], 'Test2::Event::Diag';
-isa_ok $events->[3], 'Test2::Event::Diag';
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no similar match for selector "#sam"';
+ok !$assert_facets->[1]->pass;
 
 done_testing;
 

@@ -2,79 +2,71 @@
 use Mojo::Base -strict;
 use Test2::API qw(intercept);
 use Test2::V0 -target => 'Test2::MojoX';
-
+use Test2::Tools::Tester qw/facets/;
 use Mojolicious::Lite;
 
 my $t = Test2::MojoX->new;
-my $events;
+my $assert_facets;
 
 ## content_is
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->content_is("Oops!\n");
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'exact match for content';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'exact match for content';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->content_is('Oops!');
 };
-is @$events, 4, 'exactly two events and two diag messages';
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'exact match for content';
-ok !$events->[1]->pass;
+is @$assert_facets, 2, 'exactly two events and two diag messages';
+is $assert_facets->[1]->details, 'exact match for content';
+ok !$assert_facets->[1]->pass;
 
 ## content_isnt
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->content_isnt('Oops!');
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no match for content';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no match for content';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->content_isnt("Oops!\n");
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'no match for content';
-ok !$events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'no match for content';
+ok !$assert_facets->[1]->pass;
 
 ## content_like
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->content_like(qr/Oops/);
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'content is similar';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'content is similar';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->content_like(qr/Oops$/);
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'content is similar';
-ok !$events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'content is similar';
+ok !$assert_facets->[1]->pass;
 
 ## content_unlike
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->content_unlike(qr/Oops$/);
 };
-is @$events, 2;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'content is not similar';
-ok $events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'content is not similar';
+ok $assert_facets->[1]->pass;
 
-$events = intercept {
+$assert_facets = facets assert => intercept {
   $t->get_ok('/')->content_unlike(qr/Oops/);
 };
-is @$events, 4;
-isa_ok $events->[1], 'Test2::Event::Ok';
-is $events->[1]->name, 'content is not similar';
-ok !$events->[1]->pass;
+is @$assert_facets, 2;
+is $assert_facets->[1]->details, 'content is not similar';
+ok !$assert_facets->[1]->pass;
 
 done_testing;
 
