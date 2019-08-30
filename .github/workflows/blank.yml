@@ -1,0 +1,27 @@
+name: CI
+
+jobs:
+  test:
+    name: Test on node ${{ matrix.perl_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        perl_version: [5.28.2, 5.30.0]
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: use Perl ${{ matrix.perl_version }}
+      run: |
+        wget -O plenv.tar.gz https://github.com/tokuhirom/plenv/archive/master.tar.gz
+        mkdir ~/.plenv
+        tar --directory=~/.plenv --strip-components=1 -zxvf plenv.tar.gz
+        wget -O perl-build.tar.gz https://github.com/tokuhirom/Perl-Build/archive/master.tar.gz
+        mkdir -p ~/.plenv/plugins/perl-build
+        tar --directory=~/.plenv/plugins/perl-build --strip-components=1 -zxvf perl-build.tar.gz
+        echo 'export PATH="$HOME/.plenv/bin:$PATH"' >> ~/.profile
+        echo 'eval "$(plenv init -)"' >> ~/.profile
+        exec $SHELL -l
+        env
+        plenv install $version
+      with:
+        version: ${{ matrix.perl_version }}
