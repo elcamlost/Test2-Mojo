@@ -6,14 +6,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        perl_version: ["5.28.2", "5.30.0"]    
+        perl_version: ["5.28.2"]    
     steps:
     - uses: actions/checkout@v1
     - name: use Perl ${{ matrix.perl_version }}
       run: |
-        apt-get update && apt-get -y install wget tar
-        wget -O plenv.tar.gz https://github.com/tokuhirom/plenv/archive/master.tar.gz
         mkdir ~/.plenv
+        wget -O plenv.tar.gz https://github.com/tokuhirom/plenv/archive/master.tar.gz
         tar --directory=~/.plenv --strip-components=1 -zxvf plenv.tar.gz
         wget -O perl-build.tar.gz https://github.com/tokuhirom/Perl-Build/archive/master.tar.gz
         mkdir -p ~/.plenv/plugins/perl-build
