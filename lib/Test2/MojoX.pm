@@ -1,6 +1,8 @@
 package Test2::MojoX;
 use Mojo::Base -base;
 
+our $VERSION = 0.01;
+
 ## "Amy: He knows when you are sleeping.
 ##  Professor: He knows when you're on the can.
 ##  Leela: He'll hunt you down and blast your ass from here to Pakistan.
