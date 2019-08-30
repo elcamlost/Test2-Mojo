@@ -22,6 +22,4 @@ jobs:
         echo 'eval "$(plenv init -)"' >> ~/.profile
         exec $SHELL -l
         env
-        plenv install $version
-      with:
-        version: ${{ matrix.perl_version }}
+        plenv install ${{ matrix.perl_version }}
