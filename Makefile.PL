@@ -1,45 +1,43 @@
-use 5.006;
+use 5.016000;
 use strict;
 use warnings;
 use ExtUtils::MakeMaker;
 
-my %WriteMakefileArgs = (
+WriteMakefile(
     NAME             => 'Test2::MojoX',
     AUTHOR           => q{Ilya 'elcamlost' Rassadin <elcamlost@protonmail.com>},
     VERSION_FROM     => 'lib/Test2/MojoX.pm',
     ABSTRACT_FROM    => 'lib/Test2/MojoX.pm',
-    LICENSE          => 'artistic_1',
-    MIN_PERL_VERSION => '5.006',
+    LICENSE          => 'artistic_2',
+    MIN_PERL_VERSION => '5.016',
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => '0',
     },
     TEST_REQUIRES => {
-        'Test::More' => '0',
+        'Test2::Suite' => '0.000126',
     },
     PREREQ_PM => {
         #'ABC'              => '1.6',
         #'Foo::Bar::Module' => '5.0401',
     },
+    META_MERGE   => {
+        dynamic_config => 0,
+        'meta-spec'    => {version => 2},
+        no_index       => {
+            directory => [qw(examples t)],
+        },
+        prereqs   => {runtime => {requires => {perl => '5.016000'}}},
+        resources => {
+            bugtracker => {web => 'https://github.com/elcamlost/Test2-MojoX/issues'},
+            homepage   => 'https://mojolicious.org',
+            license    => ['http://www.opensource.org/licenses/artistic-license-2.0'],
+            repository => {
+                type => 'git',
+                url  => 'git@github.com:elcamlost/Test2-MojoX.git',
+                web  => 'https://github.com/elcamlost/Test2-MojoX',
+            },
+        },
+    },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'Test2-MojoX-*' },
 );
-
-# Compatibility with old versions of ExtUtils::MakeMaker
-unless (eval { ExtUtils::MakeMaker->VERSION('6.64'); 1 }) {
-    my $test_requires = delete $WriteMakefileArgs{TEST_REQUIRES} || {};
-    @{$WriteMakefileArgs{PREREQ_PM}}{keys %$test_requires} = values %$test_requires;
-}
-
-unless (eval { ExtUtils::MakeMaker->VERSION('6.55_03'); 1 }) {
-    my $build_requires = delete $WriteMakefileArgs{BUILD_REQUIRES} || {};
-    @{$WriteMakefileArgs{PREREQ_PM}}{keys %$build_requires} = values %$build_requires;
-}
-
-delete $WriteMakefileArgs{CONFIGURE_REQUIRES}
-    unless eval { ExtUtils::MakeMaker->VERSION('6.52'); 1 };
-delete $WriteMakefileArgs{MIN_PERL_VERSION}
-    unless eval { ExtUtils::MakeMaker->VERSION('6.48'); 1 };
-delete $WriteMakefileArgs{LICENSE}
-    unless eval { ExtUtils::MakeMaker->VERSION('6.31'); 1 };
-
-WriteMakefile(%WriteMakefileArgs);
