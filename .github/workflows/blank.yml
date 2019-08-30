@@ -22,4 +22,8 @@ jobs:
         tar --directory=./plenv/plugins/perl-build --strip-components=1 -zxvf perl-build.tar.gz && \
         export PLENV_ROOT=`pwd`/plenv
         env && \
-        ./plenv/bin/plenv install ${{ matrix.perl_version }}
+        ./plenv/bin/plenv install ${{ matrix.perl_version }} && \
+        ./plenv/bin/plenv local ${{ matrix.perl_version }} && \
+        ./plenv/bin/plenv rehash && \
+        perl -v
+        
