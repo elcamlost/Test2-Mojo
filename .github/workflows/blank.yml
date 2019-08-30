@@ -11,17 +11,17 @@ jobs:
     - uses: actions/checkout@v1
     - name: use Perl ${{ matrix.perl_version }}
       run: |
-        mkdir ~/.plenv
-        ls -a ~
-        pwd
-        ls -a `pwd`
-        wget -O plenv.tar.gz https://github.com/tokuhirom/plenv/archive/master.tar.gz
-        tar --directory=~/.plenv --strip-components=1 -zxvf plenv.tar.gz
-        wget -O perl-build.tar.gz https://github.com/tokuhirom/Perl-Build/archive/master.tar.gz
-        mkdir -p ~/.plenv/plugins/perl-build
-        tar --directory=~/.plenv/plugins/perl-build --strip-components=1 -zxvf perl-build.tar.gz
-        echo 'export PATH="$HOME/.plenv/bin:$PATH"' >> ~/.profile
-        echo 'eval "$(plenv init -)"' >> ~/.profile
-        exec $SHELL -l
-        env
+        mkdir ~/.plenv && \
+        ls -a ~ && \
+        pwd && \
+        ls -a `pwd` && \
+        wget -O plenv.tar.gz https://github.com/tokuhirom/plenv/archive/master.tar.gz && \
+        tar --directory=~/.plenv --strip-components=1 -zxvf plenv.tar.gz && \
+        wget -O perl-build.tar.gz https://github.com/tokuhirom/Perl-Build/archive/master.tar.gz && \
+        mkdir -p ~/.plenv/plugins/perl-build && \
+        tar --directory=~/.plenv/plugins/perl-build --strip-components=1 -zxvf perl-build.tar.gz && \
+        echo 'export PATH="$HOME/.plenv/bin:$PATH"' >> ~/.profile && \
+        echo 'eval "$(plenv init -)"' >> ~/.profile && \
+        exec $SHELL -l && \
+        env && \
         plenv install ${{ matrix.perl_version }}
