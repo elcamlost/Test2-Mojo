@@ -562,7 +562,7 @@ Test2::Mojo - Testing Mojo
 
 =head1 SYNOPSIS
 
-  use Test2::More;
+  use Test2::MojoX;
   use Test2::V0;
 
   my $t = Test2::Mojo->new('MyApp');
@@ -589,12 +589,15 @@ Test2::Mojo - Testing Mojo
 
 =head1 DESCRIPTION
 
-L<Test2::Mojo> is a test user agent based on L<Mojo::UserAgent>, it is usually
+L<Test2::MojoX> is a test user agent based on L<Mojo::UserAgent>, it is usually
 used together with L<Test2::Suite> to test L<Mojolicious> applications. Just run
-your tests with L<yath>.
+your tests with L<prove> or L<yath>.
 
   $ yath -l -v
   $ yath -l -v t/foo.t
+
+This package is fork of L<Test::Mojo>. It was intended as a drop-in replacement for L<Test::Mojo>
+which can be used with L<Test2::Suite> instead of L<Test::More> and L<Test::Builder>.
 
 If it is not already defined, the C<MOJO_LOG_LEVEL> environment variable will
 be set to C<debug> or C<fatal>, depending on the value of the
@@ -606,7 +609,7 @@ See L<Mojolicious::Guides::Testing> for more.
 
 =head1 ATTRIBUTES
 
-L<Test2::Mojo> implements the following attributes.
+L<Test2::MojoX> implements the following attributes.
 
 =head2 message
 
@@ -689,7 +692,7 @@ User agent used for testing, defaults to a L<Mojo::UserAgent> object.
 
 =head1 METHODS
 
-L<Test2::Mojo> inherits all methods from L<Mojo::Base> and implements the
+L<Test2::MojoX> inherits all methods from L<Mojo::Base> and implements the
 following new ones.
 
 =head2 app
@@ -934,6 +937,15 @@ Opposite of L</"json_has">.
   $t = $t->json_is({foo => [1, 2, 3]});
   $t = $t->json_is('/foo' => [1, 2, 3]);
   $t = $t->json_is('/foo/1' => 2, 'right value');
+  $t = $t->json_is(hash {
+    field foo => array {
+      item 1;
+      item 2;
+      item 3;
+      end;
+    };
+    end;
+  });
 
 Check the value extracted from JSON response using the given JSON Pointer with
 L<Mojo::JSON::Pointer>, which defaults to the root value if it is omitted.
@@ -966,6 +978,15 @@ Opposite of L</"json_message_has">.
   $t = $t->json_message_is({foo => [1, 2, 3]});
   $t = $t->json_message_is('/foo' => [1, 2, 3]);
   $t = $t->json_message_is('/foo/1' => 2, 'right value');
+  $t = $t->json_is(hash {
+    field foo => array {
+      item 1;
+      item 2;
+      item 3;
+      end;
+    };
+    end;
+  });
 
 Check the value extracted from JSON WebSocket message using the given JSON
 Pointer with L<Mojo::JSON::Pointer>, which defaults to the root value if it is
@@ -975,14 +996,27 @@ omitted.
 
   $t = $t->json_message_like('/foo/1' => qr/^\d+$/);
   $t = $t->json_message_like('/foo/1' => qr/^\d+$/, 'right value');
+  $t = $t->json_message_like(hash {
+    field foo => bag {
+      item 1;
+      etc;
+    };
+  });
 
 Check the value extracted from JSON WebSocket message using the given JSON
-Pointer with L<Mojo::JSON::Pointer> for similar match.
+Pointer with L<Mojo::JSON::Pointer> for similar match, which defaults to
+the root value if it is omitted.
 
 =head2 json_message_unlike
 
   $t = $t->json_message_unlike('/foo/1' => qr/^\d+$/);
   $t = $t->json_message_unlike('/foo/1' => qr/^\d+$/, 'different value');
+  $t = $t->json_message_unlike(hash {
+    field foo => bag {
+      item 1;
+      etc;
+    };
+  });
 
 Opposite of L</"json_message_like">.
 
@@ -990,6 +1024,12 @@ Opposite of L</"json_message_like">.
 
   $t = $t->json_unlike('/foo/1' => qr/^\d+$/);
   $t = $t->json_unlike('/foo/1' => qr/^\d+$/, 'different value');
+  $t = $t->json_unlike(hash {
+    field foo => bag {
+      item 1;
+      etc;
+    };
+  });
 
 Opposite of L</"json_like">.
 
@@ -1053,7 +1093,7 @@ Opposite of L</"message_like">.
   my $t = Test2::Mojo->new(MyApp->new);
   my $t = Test2::Mojo->new(MyApp->new, {foo => 'bar'});
 
-Construct a new L<Test2::Mojo> object. In addition to a class name or
+Construct a new L<Test2::MojoX> object. In addition to a class name or
 L<Mojo::File> object pointing to the application script, you can pass along a
 hash reference with configuration values that will be used to override the
 application configuration. The special configuration value C<config_override>
@@ -1231,6 +1271,26 @@ arguments as L<Mojo::UserAgent/"websocket">, except for the callback.
     ->message_ok
     ->message_is('z' x 50000)
     ->finish_ok;
+
+=head1 ACKNOWLEDGEMENTS
+
+This code was pretty much taken directly from L<Test::Mojo>:
+
+Sebastian Riedel C<sri@cpan.org> and other wonderful people who contributed to L<Mojolicious>.
+
+Chad Granum C<exodist@cpan.org> for his outstanding work on L<Test2::Suite> and other
+perl testing tools and for advices on the code.
+
+José Joaquín Atria C<jjatria@cpan.org> for the idea to put L<Test2::Suite>
+and L<Test::Mojo> together.
+
+=head1 AUTHORS
+
+=over 4
+
+=item Ilya Rassadin E<lt>elcamlost@cpan.orgE<gt>
+
+=back
 
 =head1 SEE ALSO
 
