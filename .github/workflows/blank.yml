@@ -20,5 +20,6 @@ jobs:
         wget -O perl-build.tar.gz https://github.com/tokuhirom/Perl-Build/archive/master.tar.gz && \
         mkdir -p ./plenv/plugins/perl-build && \
         tar --directory=./plenv/plugins/perl-build --strip-components=1 -zxvf perl-build.tar.gz && \
+        export PLENV_ROOT=`pwd`/plenv
         env && \
         ./plenv/bin/plenv install ${{ matrix.perl_version }}
