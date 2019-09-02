@@ -47,55 +47,56 @@ sub app {
 }
 
 sub content_is {
-  my ($self, $value, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
   my $out
-    = is($self->tx->res->text, $value, _desc($desc, 'exact match for content'));
+    = is($self->tx->res->text, $check, _desc($desc, 'exact match for content'));
   $ctx->release;
   return $self->success($out);
 }
 
 sub content_isnt {
-  my ($self, $value, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
   my $out
-    = isnt($self->tx->res->text, $value, _desc($desc, 'no match for content'));
+    = isnt($self->tx->res->text, $check, _desc($desc, 'no match for content'));
   $ctx->release;
   return $self->success($out);
 }
 
 sub content_like {
-  my ($self, $regex, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
   my $out
-    = like($self->tx->res->text, $regex, _desc($desc, 'content is similar'));
+    = like($self->tx->res->text, $check, _desc($desc, 'content is similar'));
   $ctx->release;
   return $self->success($out);
 }
 
 sub content_type_is {
-  my ($self, $type, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
-  $desc = _desc($desc, "Content-Type: $type");
-  my $out = is($self->tx->res->headers->content_type, $type, $desc);
+  $desc = _desc($desc, ref $check || "Content-Type: $check");
+  my $out = is($self->tx->res->headers->content_type, $check, $desc);
   $ctx->release;
   return $self->success($out);
 }
 
 sub content_type_isnt {
-  my ($self, $type, $desc) = @_;
-  $desc = _desc($desc, "not Content-Type: $type");
+  my ($self, $check, $desc) = @_;
+  $desc = _desc($desc,
+    ref $check ? 'not ' . ref $check : "not Content-Type: $check");
   my $ctx = context;
-  my $out = isnt($self->tx->res->headers->content_type, $type, $desc);
+  my $out = isnt($self->tx->res->headers->content_type, $check, $desc);
   $ctx->release;
   return $self->success($out);
 }
 
 sub content_type_like {
-  my ($self, $regex, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
   $desc = _desc($desc, 'Content-Type is similar');
-  my $out = like($self->tx->res->headers->content_type, $regex, $desc);
+  my $out = like($self->tx->res->headers->content_type, $check, $desc);
   $ctx->release;
   return $self->success($out);
 }
@@ -119,10 +120,10 @@ sub content_unlike {
 }
 
 sub element_count_is {
-  my ($self, $selector, $count, $desc) = @_;
+  my ($self, $selector, $check, $desc) = @_;
   my $ctx  = context;
   my $size = $self->tx->res->dom->find($selector)->size;
-  my $out  = is($size, $count,
+  my $out  = is($size, $check,
     _desc($desc, qq{element count for selector "$selector"}));
   $ctx->release;
   return $self->success($out);
@@ -154,7 +155,8 @@ sub finish_ok {
     $self->tx->finish(@_);
     Mojo::IOLoop->one_tick while !$self->{finished};
     $out = ok(1, 'closed WebSocket');
-  } else {
+  }
+  else {
     $out = ok(0, 'connection is not WebSocket');
   }
   $ctx->release;
@@ -191,28 +193,28 @@ sub header_exists_not {
 }
 
 sub header_is {
-  my ($self, $name, $value, $desc) = @_;
+  my ($self, $name, $check, $desc) = @_;
   my $ctx = context;
-  $desc = _desc($desc, "$name: " . ($value // ''));
-  my $out = is($self->tx->res->headers->header($name), $value, $desc);
+  $desc = _desc($desc, "$name: " . (ref $check || $check // ''));
+  my $out = is($self->tx->res->headers->header($name), $check, $desc);
   $ctx->release;
   return $self->success($out);
 }
 
 sub header_isnt {
-  my ($self, $name, $value, $desc) = @_;
+  my ($self, $name, $check, $desc) = @_;
   my $ctx = context;
-  $desc = _desc($desc, "not $name: " . ($value // ''));
-  my $out = isnt($self->tx->res->headers->header($name), $value, $desc);
+  $desc = _desc($desc, "not $name: " . (ref $check || $check // ''));
+  my $out = isnt($self->tx->res->headers->header($name), $check, $desc);
   $ctx->release;
   return $self->success($out);
 }
 
 sub header_like {
-  my ($self, $name, $regex, $desc) = @_;
+  my ($self, $name, $check, $desc) = @_;
   my $ctx = context;
   $desc = _desc($desc, "$name is similar");
-  my $out = like($self->tx->res->headers->header($name), $regex, $desc);
+  my $out = like($self->tx->res->headers->header($name), $check, $desc);
   $ctx->release;
   return $self->success($out);
 }
@@ -258,10 +260,10 @@ sub json_is {
 
 sub json_like {
   my $self = shift;
-  my ($p, $data) = @_ > 1 ? (shift, shift) : ('', shift);
+  my ($p, $check) = @_ > 1 ? (shift, shift) : ('', shift);
   my $ctx = context;
   my $out = like($self->tx->res->json($p),
-    $data, _desc(shift, qq{similar match for JSON Pointer "$p"}));
+    $check, _desc(shift, qq{similar match for JSON Pointer "$p"}));
   $ctx->release;
   return $self->success($out);
 }
@@ -297,9 +299,9 @@ sub json_message_is {
 sub json_message_like {
   my $self = shift;
   my $ctx  = context;
-  my ($p, $data) = @_ > 1 ? (shift, shift) : ('', shift);
+  my ($p, $check) = @_ > 1 ? (shift, shift) : ('', shift);
   my $out = like($self->_json(get => $p),
-    $data, _desc(shift, qq{similar match for JSON Pointer "$p"}));
+    $check, _desc(shift, qq{similar match for JSON Pointer "$p"}));
   $ctx->release;
   return $self->success($out);
 }
@@ -325,25 +327,25 @@ sub json_unlike {
 }
 
 sub message_is {
-  my ($self, $value, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
-  $self->_message('is', $value, _desc($desc, 'exact match for message'));
+  $self->_message('is', $check, _desc($desc, 'exact match for message'));
   $ctx->release;
   return $self;
 }
 
 sub message_isnt {
-  my ($self, $value, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
-  $self->_message('isnt', $value, _desc($desc, 'no match for message'));
+  $self->_message('isnt', $check, _desc($desc, 'no match for message'));
   $ctx->release;
   return $self;
 }
 
 sub message_like {
-  my ($self, $regex, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
-  $self->_message('like', $regex, _desc($desc, 'message is similar'));
+  $self->_message('like', $check, _desc($desc, 'message is similar'));
   $ctx->release;
   return $self;
 }
@@ -417,47 +419,50 @@ sub send_ok {
 }
 
 sub status_is {
-  my ($self, $status, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
-  $desc = _desc($desc, "$status " . $self->tx->res->default_message($status));
-  my $out = is($self->tx->res->code, $status, $desc);
+  $desc = _desc($desc,
+    ref $check || "$check " . $self->tx->res->default_message($check));
+  my $out = is($self->tx->res->code, $check, $desc);
   $ctx->release;
   return $self->success($out);
 }
 
 sub status_isnt {
-  my ($self, $status, $desc) = @_;
+  my ($self, $check, $desc) = @_;
   my $ctx = context;
-  $desc
-    = _desc($desc, "not $status " . $self->tx->res->default_message($status));
-  my $out = isnt($self->tx->res->code, $status, $desc);
+  $desc = _desc($desc,
+    ref $check
+    ? 'not ' . ref $check
+    : "not $check " . $self->tx->res->default_message($check));
+  my $out = isnt($self->tx->res->code, $check, $desc);
   $ctx->release;
   return $self->success($out);
 }
 
 sub text_is {
-  my ($self, $selector, $value, $desc) = @_;
+  my ($self, $selector, $check, $desc) = @_;
   my $ctx = context;
   my $out = is($self->_text($selector),
-    $value, _desc($desc, qq{exact match for selector "$selector"}));
+    $check, _desc($desc, qq{exact match for selector "$selector"}));
   $ctx->release;
   return $self->success($out);
 }
 
 sub text_isnt {
-  my ($self, $selector, $value, $desc) = @_;
+  my ($self, $selector, $check, $desc) = @_;
   my $ctx = context;
   my $out = isnt($self->_text($selector),
-    $value, _desc($desc, qq{no match for selector "$selector"}));
+    $check, _desc($desc, qq{no match for selector "$selector"}));
   $ctx->release;
   return $self->success($out);
 }
 
 sub text_like {
-  my ($self, $selector, $regex, $desc) = @_;
+  my ($self, $selector, $check, $desc) = @_;
   my $ctx = context;
   my $out = like($self->_text($selector),
-    $regex, _desc($desc, qq{similar match for selector "$selector"}));
+    $check, _desc($desc, qq{similar match for selector "$selector"}));
   $ctx->release;
   return $self->success($out);
 }
@@ -599,7 +604,9 @@ your tests with L<prove> or L<yath>.
   $ yath -l -v t/foo.t
 
 This package is fork of L<Test::Mojo>. It was intended as a drop-in replacement for L<Test::Mojo>
-which can be used with L<Test2::Suite> instead of L<Test::More> and L<Test::Builder>.
+which can be used with L<Test2::Suite> instead of L<Test::More> and L<Test::Builder>. This module
+uses Test2 semantic for B<is> and B<like>. B<Is> for strict checks and B<like> for relaxed. See
+L<Test2::Tools::Compare> for details.
 
 If it is not already defined, the C<MOJO_LOG_LEVEL> environment variable will
 be set to C<debug> or C<fatal>, depending on the value of the
@@ -1218,6 +1225,7 @@ Send message or frame via WebSocket.
 
   $t = $t->status_is(200);
   $t = $t->status_is(200, 'right status');
+  $t = $t->status_is(match qr/^3/, 'request redirected');
 
 Check response status for exact match.
 
@@ -1225,6 +1233,7 @@ Check response status for exact match.
 
   $t = $t->status_isnt(200);
   $t = $t->status_isnt(200, 'different status');
+  $t = $t->status_isnt(match qr/^3/, 'request is not redirected');
 
 Opposite of L</"status_is">.
 
@@ -1296,6 +1305,6 @@ and L<Test::Mojo> together.
 
 =head1 SEE ALSO
 
-L<Mojolicious>, L<Mojolicious::Guides>, L<https://mojolicious.org>.
+L<Mojolicious>, L<Mojolicious::Guides>, L<https://mojolicious.org>, L<Test2::Manual::Testing>.
 
 =cut
