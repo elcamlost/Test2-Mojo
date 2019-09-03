@@ -1,5 +1,5 @@
 
-# Test2::MojoX [![Build Status](https://api.travis-ci.com/elcamlost/Test2-MojoX.svg?branch=master)](https://travis-ci.com/elcamlost/Test2-MojoX)
+# Test2::MojoX [![Build Status](https://api.travis-ci.com/elcamlost/Test2-MojoX.svg?branch=master)](https://travis-ci.com/elcamlost/Test2-MojoX) [![Coverage Status](https://coveralls.io/repos/github/elcamlost/Test2-MojoX/badge.svg)](https://coveralls.io/github/elcamlost/Test2-MojoX)
 
   Testing Mojo with Test2
 
