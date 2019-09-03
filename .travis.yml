@@ -18,8 +18,6 @@ env:
     - HARNESS_OPTIONS=j9
 before_install:
   - eval $(curl https://travis-perl.github.io/init) --auto
-install:
-  - cpanm -n --installdeps .
 sudo: false
 notifications:
   email: true
