@@ -1,5 +1,5 @@
 
-# Test2::MojoX [![Build Status](https://api.travis-ci.org/elcamlost/test2-mojox.svg?branch=master)](https://travis-ci.org/mojolicious/json-validator)
+# Test2::MojoX [![Build Status](https://api.travis-ci.com/elcamlost/Test2-MojoX.svg?branch=master)](https://travis-ci.com/elcamlost/Test2-MojoX)
 
   Testing Mojo with Test2
 
