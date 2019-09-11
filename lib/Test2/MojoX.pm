@@ -1,7 +1,7 @@
 package Test2::MojoX;
 use Mojo::Base -base;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 ## "Amy: He knows when you are sleeping.
 ##  Professor: He knows when you're on the can.

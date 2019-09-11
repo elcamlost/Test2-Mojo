@@ -1,5 +1,8 @@
 Revision history for Test2-MojoX
 
+0.03    2019-09-11
+        - Fix Makefile.PL dependecies (thanks Grinnz)
+
 0.02    2019-09-03
         - Fix test default names for *_is tests
         - Improve documentation
