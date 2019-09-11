@@ -1,5 +1,8 @@
 Revision history for Test2-MojoX
 
+0.04    2019-09-11
+        - Improve documentation
+
 0.03    2019-09-11
         - Fix Makefile.PL dependecies (thanks Grinnz)
 
