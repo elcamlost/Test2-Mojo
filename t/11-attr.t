@@ -29,9 +29,11 @@ ok $assert_facets->[3]->pass;
 $assert_facets = facets assert => intercept {
   $t->get_ok('/')->attr_is('#author', 'name', 'bilbo')
     ->attr_is('#author', 'surname', match qr/bag/, 'from bag-end')
-    ->attr_is('#author', 'name', U());
+    ->attr_is('#author', 'name', U())
+    ->attr_is('#author', 'middle_name', q[])
+    ->attr_is('#publisher', 'name', undef);
 };
-is @$assert_facets, 4, 'four tests done';
+is @$assert_facets, 6, 'six tests done';
 is $assert_facets->[1]->details,
   'exact match for attribute "name" at selector "#author"';
 ok !$assert_facets->[1]->pass;
@@ -40,6 +42,12 @@ ok !$assert_facets->[2]->pass;
 is $assert_facets->[3]->details,
   'exact match for attribute "name" at selector "#author"';
 ok !$assert_facets->[3]->pass;
+is $assert_facets->[4]->details,
+  'exact match for attribute "middle_name" at selector "#author"';
+ok $assert_facets->[4]->pass;
+is $assert_facets->[5]->details,
+  'exact match for attribute "name" at selector "#publisher"';
+ok $assert_facets->[5]->pass;
 
 ## attr_isnt
 $assert_facets = facets assert => intercept {
@@ -137,5 +145,5 @@ __DATA__
 @@ index.html.epl
 <div>
 <span id="hobbit" name="bilbo" surname="baggins">Bilbo Baggins</li>
-<span id="author" name"john" surname="tolkien">John R. R. Tolkien</li>
+<span id="author" name="john" surname="tolkien">John R. R. Tolkien</li>
 </div>
