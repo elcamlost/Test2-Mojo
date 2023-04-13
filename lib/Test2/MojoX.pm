@@ -24,7 +24,7 @@ has ua =>
   sub { Mojo::UserAgent->new(insecure => 1)->ioloop(Mojo::IOLoop->singleton) };
 
 # Silent or loud tests
-$ENV{MOJO_LOG_LEVEL} ||= $ENV{HARNESS_IS_VERBOSE} ? 'debug' : 'fatal';
+$ENV{MOJO_LOG_LEVEL} ||= $ENV{HARNESS_IS_VERBOSE} ? 'trace' : 'fatal';
 
 for my $method (qw(delete get head options patch post put)) {
   monkey_patch __PACKAGE__, "${method}_ok", sub {
@@ -655,7 +655,7 @@ uses Test2 semantic for B<is> and B<like>. B<Is> for strict checks and B<like> f
 L<Test2::Tools::Compare> for details.
 
 If it is not already defined, the C<MOJO_LOG_LEVEL> environment variable will
-be set to C<debug> or C<fatal>, depending on the value of the
+be set to C<trace> or C<fatal>, depending on the value of the
 C<HARNESS_IS_VERBOSE> environment variable. And to make it easier to test
 HTTPS/WSS web services L<Mojo::UserAgent/"insecure"> will be activated by
 default for L</"ua">.
